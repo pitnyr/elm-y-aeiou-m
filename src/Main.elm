@@ -1,16 +1,47 @@
 module Main exposing (main)
 
+import Browser
 import Html as H
 
 
-main : H.Html msg
+main : Program () Val Msg
 main =
+    Browser.element
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
+
+
+type alias Msg =
+    ()
+
+
+init : () -> ( Val, Cmd Msg )
+init () =
     -- create initial Val
-    Val 0
+    ( Val 0, Cmd.none )
+
+
+update : Msg -> Val -> ( Val, Cmd Msg )
+update _ val =
+    ( val, Cmd.none )
+
+
+view : Val -> H.Html Msg
+view val =
+    -- take the current Val
+    val
         -- pass it to the main IO function
         |> mainIO
         -- get the final result from the ( result, val ) tuple
         |> Tuple.first
+
+
+subscriptions : Val -> Sub Msg
+subscriptions _ =
+    Sub.none
 
 
 mainIO : IO (H.Html msg)
