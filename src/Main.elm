@@ -4,7 +4,7 @@ import Browser
 import Html as H
 
 
-main : Program () Val Msg
+main : Program () World Msg
 main =
     Browser.element
         { init = init
@@ -14,32 +14,36 @@ main =
         }
 
 
+type alias World =
+    { val : Int }
+
+
 type alias Msg =
     ()
 
 
-init : () -> ( Val, Cmd Msg )
+init : () -> ( World, Cmd Msg )
 init () =
-    -- create initial Val
-    ( Val 0, Cmd.none )
+    -- create initial world
+    ( { val = 0 }, Cmd.none )
 
 
-update : Msg -> Val -> ( Val, Cmd Msg )
-update _ val =
-    ( val, Cmd.none )
+update : Msg -> World -> ( World, Cmd Msg )
+update _ world =
+    ( world, Cmd.none )
 
 
-view : Val -> H.Html Msg
-view val =
-    -- take the current Val
-    val
+view : World -> H.Html Msg
+view world =
+    -- take the current world
+    world
         -- pass it to the main IO function
         |> mainIO
-        -- get the final result from the ( result, val ) tuple
+        -- get the final result from the ( result, world ) tuple
         |> Tuple.first
 
 
-subscriptions : Val -> Sub Msg
+subscriptions : World -> Sub Msg
 subscriptions _ =
     Sub.none
 
@@ -59,30 +63,26 @@ mainIO =
                         )
 
 
-type Val
-    = Val Int
-
-
 type alias IO a =
-    Val -> ( a, Val )
+    World -> ( a, World )
 
 
 return : a -> IO a
 return a =
-    \val -> ( a, val )
+    \world -> ( a, world )
 
 
 bind : IO a -> (a -> IO b) -> IO b
 bind ioa f =
-    \val0 ->
+    \world0 ->
         let
-            ( a, val1 ) =
-                ioa val0
+            ( a, world1 ) =
+                ioa world0
 
-            ( b, val2 ) =
-                f a val1
+            ( b, world2 ) =
+                f a world1
         in
-        ( b, val2 )
+        ( b, world2 )
 
 
 {-| Goal: return a random uppercase character
@@ -91,9 +91,9 @@ Currently the character is only dependent on the given parameter value.
 
 -}
 getChar : IO Char
-getChar (Val code) =
-    ( Char.fromCode (Char.toCode 'A' + modBy 26 code)
-    , Val (code + 1)
+getChar world =
+    ( Char.fromCode (Char.toCode 'A' + modBy 26 world.val)
+    , { val = world.val + 1 }
     )
 
 
