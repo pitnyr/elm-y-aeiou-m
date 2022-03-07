@@ -6,10 +6,14 @@ import Html as H
 main : H.Html msg
 main =
     H.div []
-        [ H.text <| "get2Chars: " ++ get2Chars
+        [ H.text <| "get2Chars: " ++ get2Chars (Val 1) (Val 2)
         , H.br [] []
-        , H.text <| "nowOrLater: " ++ nowOrLater
+        , H.text <| "nowOrLater: " ++ nowOrLater (Val 0)
         ]
+
+
+type Val
+    = Val Int
 
 
 {-| Goal: return a random uppercase character
@@ -17,19 +21,19 @@ main =
 Currently the character is only dependent on the given parameter value.
 
 -}
-getChar : Int -> Char
-getChar code =
+getChar : Val -> Char
+getChar (Val code) =
     Char.fromCode (Char.toCode 'A' + modBy 26 code)
 
 
-get2Chars : String
-get2Chars =
-    String.fromChar (getChar 1) ++ String.fromChar (getChar 2)
+get2Chars : Val -> Val -> String
+get2Chars val1 val2 =
+    String.fromChar (getChar val1) ++ String.fromChar (getChar val2)
 
 
-nowOrLater : String
-nowOrLater =
-    case getChar 0 of
+nowOrLater : Val -> String
+nowOrLater val =
+    case getChar val of
         'Y' ->
             "Now"
 
