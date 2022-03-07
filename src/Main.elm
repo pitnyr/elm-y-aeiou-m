@@ -5,19 +5,33 @@ import Html as H
 
 main : H.Html msg
 main =
-    H.text get2Chars
+    H.div []
+        [ H.text <| "get2Chars: " ++ get2Chars
+        , H.br [] []
+        , H.text <| "nowOrLater: " ++ nowOrLater
+        ]
 
 
 {-| Goal: return a random uppercase character
 
-Currently all we can do is to always return the same character...
+Currently the character is only dependent on the given parameter value.
 
 -}
-getChar : Char
-getChar =
-    'X'
+getChar : Int -> Char
+getChar code =
+    Char.fromCode (Char.toCode 'A' + modBy 26 code)
 
 
 get2Chars : String
 get2Chars =
-    String.fromChar getChar ++ String.fromChar getChar
+    String.fromChar (getChar 1) ++ String.fromChar (getChar 2)
+
+
+nowOrLater : String
+nowOrLater =
+    case getChar 0 of
+        'Y' ->
+            "Now"
+
+        _ ->
+            "Later"
