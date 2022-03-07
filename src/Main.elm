@@ -5,18 +5,27 @@ import Html as H
 
 main : H.Html msg
 main =
-    let
-        ( fourChars, _ ) =
-            get4Chars (Val 1)
+    -- create initial Val
+    Val 0
+        -- pass it to the main IO function
+        |> mainIO
+        -- get the final result from the ( result, val ) tuple
+        |> Tuple.first
 
-        ( when, _ ) =
-            nowOrLater (Val 0)
-    in
-    H.div []
-        [ H.text <| "get4Chars: " ++ fourChars
-        , H.br [] []
-        , H.text <| "nowOrLater: " ++ when
-        ]
+
+mainIO : IO (H.Html msg)
+mainIO =
+    bind get4Chars <|
+        \fourChars ->
+            bind nowOrLater <|
+                \when ->
+                    return
+                        (H.div []
+                            [ H.text <| "get4Chars: " ++ fourChars
+                            , H.br [] []
+                            , H.text <| "nowOrLater: " ++ when
+                            ]
+                        )
 
 
 type Val
