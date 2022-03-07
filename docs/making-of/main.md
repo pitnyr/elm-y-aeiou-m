@@ -22,3 +22,14 @@ I want everything to be done on feature branches, so the first commit is empty:
 ```email
 subject: Add empty root commit
 ```
+
+<a id="commit-2022-03-07-17-12"></a>
+
+The remaining setup is handled in feature branch [setup](setup.md).
+
+[commit-2022-03-07-17-12](https://github.com/pitnyr/elm-y-aeiou-m/commit/dd94956a9a897281e8694a90980538feb397a786)
+```email
+subject: Merge branch 'setup'
+
+Setup the project structure.
+```
