@@ -2,6 +2,9 @@ module Main exposing (main)
 
 import Browser
 import Html as H
+import Random
+import Task
+import Time
 
 
 main : Program () World Msg
@@ -15,22 +18,28 @@ main =
 
 
 type alias World =
-    { val : Int }
+    { seed : Random.Seed }
 
 
-type alias Msg =
-    ()
+type Msg
+    = GotCurrentTime Time.Posix
 
 
 init : () -> ( World, Cmd Msg )
 init () =
     -- create initial world
-    ( { val = 0 }, Cmd.none )
+    ( { seed = Random.initialSeed 0 }
+    , Task.perform GotCurrentTime Time.now
+    )
 
 
 update : Msg -> World -> ( World, Cmd Msg )
-update _ world =
-    ( world, Cmd.none )
+update msg _ =
+    case msg of
+        GotCurrentTime posix ->
+            ( { seed = Random.initialSeed (Time.posixToMillis posix) }
+            , Cmd.none
+            )
 
 
 view : World -> H.Html Msg
@@ -85,15 +94,14 @@ bind ioa f =
         ( b, world2 )
 
 
-{-| Goal: return a random uppercase character
-
-Currently the character is only dependent on the given parameter value.
-
--}
 getChar : IO Char
 getChar world =
-    ( Char.fromCode (Char.toCode 'A' + modBy 26 world.val)
-    , { val = world.val + 1 }
+    let
+        ( code, newSeed ) =
+            Random.step (Random.int 0 25) world.seed
+    in
+    ( Char.fromCode (Char.toCode 'A' + code)
+    , { seed = newSeed }
     )
 
 
