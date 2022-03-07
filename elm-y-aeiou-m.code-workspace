@@ -1,0 +1,14 @@
+{
+        "folders": [
+                {
+                        "path": ".gh-pages"
+                },
+                {
+                        "path": "."
+                }
+        ],
+        "settings": {
+                "making-of.publishUrl": "https://pitnyr.github.io/elm-y-aeiou-m/",
+                "making-of.sourceUrl": "https://github.com/pitnyr/elm-y-aeiou-m/"
+        }
+}
