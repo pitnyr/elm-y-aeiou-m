@@ -23,51 +23,69 @@ type Val
     = Val Int
 
 
+type alias IO a =
+    Val -> ( a, Val )
+
+
+return : a -> IO a
+return a =
+    \val -> ( a, val )
+
+
+bind : IO a -> (a -> IO b) -> IO b
+bind ioa f =
+    \val0 ->
+        let
+            ( a, val1 ) =
+                ioa val0
+
+            ( b, val2 ) =
+                f a val1
+        in
+        ( b, val2 )
+
+
 {-| Goal: return a random uppercase character
 
 Currently the character is only dependent on the given parameter value.
 
 -}
-getChar : Val -> ( Char, Val )
+getChar : IO Char
 getChar (Val code) =
     ( Char.fromCode (Char.toCode 'A' + modBy 26 code)
     , Val (code + 1)
     )
 
 
-get2Chars : Val -> ( String, Val )
-get2Chars val0 =
-    let
-        ( a, val1 ) =
-            getChar val0
-
-        ( b, val2 ) =
-            getChar val1
-    in
-    ( String.fromChar a ++ String.fromChar b
-    , val2
-    )
+get2Chars : IO String
+get2Chars =
+    bind getChar <|
+        \a ->
+            bind getChar <|
+                \b ->
+                    return
+                        (String.fromChar a ++ String.fromChar b)
 
 
-get4Chars : Val -> ( String, Val )
-get4Chars val0 =
-    let
-        ( a, val1 ) =
-            get2Chars val0
-
-        ( b, val2 ) =
-            get2Chars val1
-    in
-    ( a ++ b
-    , val2
-    )
+get4Chars : IO String
+get4Chars =
+    bind get2Chars <|
+        \a ->
+            bind get2Chars <|
+                \b ->
+                    return
+                        (a ++ b)
 
 
-nowOrLater : Val -> ( String, Val )
-nowOrLater val0 =
-    case getChar val0 of
-        ( 'Y', val1 ) ->
-            ( "Now", val1 )
+nowOrLater : IO String
+nowOrLater =
+    bind getChar <|
+        \c ->
+            return
+                (case c of
+                    'Y' ->
+                        "Now"
 
-        ( _, val1 ) ->
-            ( "Later", val1 )
+                    _ ->
+                        "Later"
+                )
