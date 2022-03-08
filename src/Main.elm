@@ -18,7 +18,9 @@ main =
 
 
 type alias World =
-    { seed : Random.Seed }
+    { seed : Random.Seed
+    , output : List String
+    }
 
 
 type Msg
@@ -27,29 +29,27 @@ type Msg
 
 init : () -> ( World, Cmd Msg )
 init () =
-    -- create initial world
-    ( { seed = Random.initialSeed 0 }
+    ( { seed = Random.initialSeed 0
+      , output = []
+      }
     , Task.perform GotCurrentTime Time.now
     )
 
 
 update : Msg -> World -> ( World, Cmd Msg )
-update msg _ =
+update msg world =
     case msg of
         GotCurrentTime posix ->
-            ( { seed = Random.initialSeed (Time.posixToMillis posix) }
+            ( { world | seed = Random.initialSeed (Time.posixToMillis posix) }
+                |> mainIO
+                |> Tuple.second
             , Cmd.none
             )
 
 
 view : World -> H.Html Msg
 view world =
-    -- take the current world
-    world
-        -- pass it to the main IO function
-        |> mainIO
-        -- get the final result from the ( result, world ) tuple
-        |> Tuple.first
+    H.div [] (List.map (\text -> H.p [] [ H.text text ]) world.output)
 
 
 subscriptions : World -> Sub Msg
@@ -57,19 +57,15 @@ subscriptions _ =
     Sub.none
 
 
-mainIO : IO (H.Html msg)
+mainIO : IO ()
 mainIO =
     bind get4Chars <|
         \fourChars ->
-            bind nowOrLater <|
-                \when ->
-                    return
-                        (H.div []
-                            [ H.text <| "get4Chars: " ++ fourChars
-                            , H.br [] []
-                            , H.text <| "nowOrLater: " ++ when
-                            ]
-                        )
+            bind (putStr <| "get4Chars: " ++ fourChars) <|
+                \() ->
+                    bind nowOrLater <|
+                        \when ->
+                            putStr <| "nowOrLater: " ++ when
 
 
 type alias IO a =
@@ -101,7 +97,7 @@ getChar world =
             Random.step (Random.int 0 25) world.seed
     in
     ( Char.fromCode (Char.toCode 'A' + code)
-    , { seed = newSeed }
+    , { world | seed = newSeed }
     )
 
 
@@ -137,3 +133,10 @@ nowOrLater =
                     _ ->
                         "Later"
                 )
+
+
+putStr : String -> IO ()
+putStr text world =
+    ( ()
+    , { world | output = world.output ++ [ text ] }
+    )
